@@ -1,31 +1,26 @@
-import React, { useCallback, useState } from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Switch,
-  Redirect,
-} from "react-router-dom";
-import Users from "./users/pages/Users";
-import NewPlaces from "./places/pages/NewPlaces";
+import React, { Suspense } from "react";
+import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
+// import Users from "./users/pages/Users";
+// import NewPlaces from "./places/pages/NewPlaces";
 import MainNavigation from "./shared/components/Navigation/MainNavigation";
-import UserPlaces from "./places/pages/UserPlaces";
-import UpdatePlace from "./places/pages/UpdatePlace";
-import Auth from "./users/pages/Auth";
+// import UserPlaces from "./places/pages/UserPlaces";
+// import UpdatePlace from "./places/pages/UpdatePlace";
+// import Auth from "./users/pages/Auth";
 import { AuthContext } from "./shared/context/auth-context";
+import { useAuth } from "./shared/hooks/auth-hook";
+import LoadingSpinner from "./shared/components/UIElements/LoadingSpinner";
+
+const Users = React.lazy(() => import("./users/pages/Users"));
+const NewPlaces = React.lazy(() => import("./places/pages/NewPlaces"));
+const UserPlaces = React.lazy(() => import("./places/pages/UserPlaces"));
+const UpdatePlace = React.lazy(() => import("./places/pages/UpdatePlace"));
+const Auth = React.lazy(() => import("./users/pages/Auth"));
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const login = useCallback(() => {
-    setIsLoggedIn(true);
-  }, []);
-  const logout = useCallback(() => {
-    setIsLoggedIn(false);
-  }, []);
+  const { token, userId, login, logout } = useAuth();
 
   let routes;
-
-  if (isLoggedIn) {
+  if (token) {
     routes = (
       <Switch>
         <Route path="/" exact>
@@ -62,12 +57,28 @@ function App() {
 
   return (
     <AuthContext.Provider
-      value={{ isLoggedIn: isLoggedIn, login: login, logout: logout }}
+      value={{
+        isLoggedIn: !!token,
+        token: token,
+        userId: userId,
+        login: login,
+        logout: logout,
+      }}
     >
-      <Router>
+      <BrowserRouter>
         <MainNavigation />
-        <main>{routes}</main>
-      </Router>
+        <main>
+          <Suspense
+            fallback={
+              <div className="center">
+                <LoadingSpinner />
+              </div>
+            }
+          >
+            {routes}
+          </Suspense>
+        </main>
+      </BrowserRouter>
     </AuthContext.Provider>
   );
 }

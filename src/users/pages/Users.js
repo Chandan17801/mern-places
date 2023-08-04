@@ -1,23 +1,33 @@
-import React from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import UserList from "../components/UserList";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
 
-const USERS = [
-  {
-    id: "u1",
-    name: "Doraemon",
-    image: "https://easydrawingguides.com/wp-content/uploads/2021/05/Doraemon-Step-10.png",
-    places: 4,
-  },
-  {
-    id: "u2",
-    name: "Nobita",
-    image: "https://e0.pxfuel.com/wallpapers/757/209/desktop-wallpaper-nobita-art-sleeve-doraemon-thumbnail.jpg",
-    places: 2,
-  },
-];
+import { useHttpClient } from "../../shared/hooks/http-hook";
 
 function Users() {
-  return <UserList items={USERS} />;
+  const [users, setUsers] = useState();
+  const { sendRequest, errorModalHandler, isLoading, error } = useHttpClient();
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const responseData = await sendRequest(
+          process.env.REACT_APP_BACKEND_URL + "/users"
+        );
+        setUsers(responseData.users);
+      } catch (err) {}
+    };
+    fetchUsers();
+  }, [sendRequest]);
+
+  return (
+    <Fragment>
+      <ErrorModal error={error} onClear={errorModalHandler} />
+      {isLoading && <LoadingSpinner asOverlay />}
+      {!isLoading && users && <UserList items={users} />}
+    </Fragment>
+  );
 }
 
 export default Users;

@@ -22,13 +22,13 @@ function PlaceList(props) {
         <PlaceItem
           id={item.id}
           key={item.id}
-          name={item.name}
           image={item.image}
           title={item.title}
           address={item.address}
           description={item.description}
-          createrId={item.createrId}
+          creator={item.creator}
           coordinates={item.location}
+          onDelete={props.onDelete}
         />
       ))}
     </ul>

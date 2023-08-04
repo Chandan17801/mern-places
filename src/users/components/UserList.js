@@ -21,7 +21,7 @@ function UserList(props) {
           id={item.id}
           image={item.image}
           name={item.name}
-          places={item.places}
+          places={item.places.length}
         />
       ))}
     </ul>

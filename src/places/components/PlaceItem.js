@@ -2,14 +2,17 @@ import React, { Fragment, useState, useContext } from "react";
 import Card from "../../shared/components/UIElements/Card";
 import Button from "../../shared/components/FormElements/Button";
 import Modal from "../../shared/components/UIElements/Modal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 import Map from "../../shared/components/UIElements/Map";
 import { AuthContext } from "../../shared/context/auth-context";
+import { useHttpClient } from "../../shared/hooks/http-hook";
 
 import "./PlaceItem.css";
 
 function PlaceItem(props) {
   const auth = useContext(AuthContext);
-
+  const { sendRequest, errorModalHandler, isLoading, error } = useHttpClient();
   const [showMap, setShowMap] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -22,12 +25,32 @@ function PlaceItem(props) {
   const closeDeleteHandler = () => {
     setShowDeleteModal(false);
   };
-  const confirmDeleteHandler = () => {
+  const confirmDeleteHandler = async () => {
     setShowDeleteModal(false);
-    console.log("Deleting");
+    try {
+      await sendRequest(
+        process.env.REACT_APP_BACKEND_URL + `/places/${props.id}`,
+        "DELETE",
+        null,
+        {
+          Authorization: "Bearer " + auth.token,
+        }
+      );
+      props.onDelete(props.id);
+    } catch (err) {}
   };
+
+  if (isLoading) {
+    return (
+      <div className="center">
+        <LoadingSpinner asOverlay />
+      </div>
+    );
+  }
+
   return (
     <Fragment>
+      <ErrorModal error={error} onClear={errorModalHandler} />
       <Modal
         show={showMap}
         onCancel={closeMapHandler}
@@ -61,7 +84,10 @@ function PlaceItem(props) {
       <li className="place-item">
         <Card className="place0item__content">
           <div className="place-item__image">
-            <img src={props.image} alt={props.title} />
+            <img
+              src={process.env.REACT_APP_ASSET_URL + `/${props.image}`}
+              alt={props.title}
+            />
           </div>
           <div className="place-item__info">
             <h2>{props.title}</h2>
@@ -69,13 +95,13 @@ function PlaceItem(props) {
             <p>{props.description}</p>
           </div>
           <div className="place-item__actions">
-            <Button inverse onClick={openMapHandler}>
+            <Button inverse disabled onClick={openMapHandler}>
               VIEW ON MAP
             </Button>
-            {auth.isLoggedIn && (
+            {auth.userId === props.creator && (
               <Button to={`/places/${props.id}`}>EDIT</Button>
             )}
-            {auth.isLoggedIn && (
+            {auth.userId === props.creator && (
               <Button danger onClick={openDeleteHandler}>
                 DELETE
               </Button>

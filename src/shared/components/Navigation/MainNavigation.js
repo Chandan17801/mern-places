@@ -20,7 +20,7 @@ function MainNavigation() {
 
   return (
     <Fragment>
-      {drawerIsOpen && <BackDrop onclick={closeDrawer} />}
+      {drawerIsOpen && <BackDrop onClick={closeDrawer} />}
       <SideDrawer show={drawerIsOpen} onClick={closeDrawer}>
         <nav className="main-navigation__drawer-nav">
           <NavLinks />
