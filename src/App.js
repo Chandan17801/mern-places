@@ -1,11 +1,6 @@
 import React, { Suspense } from "react";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
-// import Users from "./users/pages/Users";
-// import NewPlaces from "./places/pages/NewPlaces";
 import MainNavigation from "./shared/components/Navigation/MainNavigation";
-// import UserPlaces from "./places/pages/UserPlaces";
-// import UpdatePlace from "./places/pages/UpdatePlace";
-// import Auth from "./users/pages/Auth";
 import { AuthContext } from "./shared/context/auth-context";
 import { useAuth } from "./shared/hooks/auth-hook";
 import LoadingSpinner from "./shared/components/UIElements/LoadingSpinner";
